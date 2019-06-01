@@ -1,9 +1,11 @@
 package discordapp
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -78,7 +80,10 @@ func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) (*Res
 	if err != nil {
 		return nil, err
 	}
-	err = json.NewDecoder(resp.Body).Decode(v)
+	buf := bytes.NewBuffer(make([]byte, 0, 4096))
+	io.Copy(buf, resp.Body)
+	//fmt.Println(string(buf.Bytes()))
+	err = json.NewDecoder(buf).Decode(v)
 	if err != nil {
 		return nil, err
 	}
